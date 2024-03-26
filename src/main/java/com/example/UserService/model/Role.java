@@ -1,5 +1,6 @@
 package com.example.UserService.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.Setter;
 import java.util.Set;
 
 @Entity
-@Table(name = "roles")
+@Table
 @Data
 @Builder
 @Getter
@@ -25,10 +26,10 @@ public class Role {
     private String name;
 
     @ManyToMany
-    @JoinTable(name = "user_roles",
+    @JoinTable(name = "user_role",
     joinColumns = @JoinColumn(name ="user_id"),
-            inverseJoinColumns = @JoinColumn(name= "roles_id"))
-    @JsonIdentityReference
+            inverseJoinColumns = @JoinColumn(name= "role_id"))
+    @JsonBackReference
     private Set<User> users;
 
 }

@@ -4,25 +4,40 @@ import com.example.UserService.dto.LoginRequest;
 import com.example.UserService.dto.LoginResponse;
 import com.example.UserService.dto.UserRequest;
 import com.example.UserService.repository.UserRepository;
+import com.example.UserService.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.security.auth.kerberos.KerberosTicket;
+import java.security.cert.Certificate;
+
 @RestController
 @RequestMapping(path = "/api/auth")
 public class AuthController {
 
+    @Autowired
+    AuthService authService;
+
 
     @PostMapping(path = "/signin")
-    public LoginResponse signIn(@RequestBody LoginRequest loginRequest){
-        //To do
+    public LoginResponse signIn(@RequestBody @Valid LoginRequest loginRequest){
+        //authenticate and send back login response
+        LoginResponse loginResponse = authService.authenticateUser(loginRequest);
+        return loginResponse;
     }
 
     @PostMapping(path = "/signup")
-    public String signUp(@RequestBody UserRequest userRequest){
-        //To do
+    public ResponseEntity<Object> signUp(@RequestBody @Valid UserRequest userRequest){
+        //Sign up the user
+        ResponseEntity<Object> response = authService.signUpUser(userRequest);
+        return response;
     }
+
 }
+

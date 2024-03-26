@@ -1,5 +1,6 @@
 package com.example.UserService.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.Setter;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table
 @Getter
 @Setter
 @Data
@@ -26,6 +27,6 @@ public class User {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonIgnoreProperties
     private Set<Role> roles;
 }

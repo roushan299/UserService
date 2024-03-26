@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: UserService
+  datasource:
+    url: jdbc:mysql://localhost:3306/userService?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 14321432
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate.ddl-auto: update
+  output:
+    ansi:
+      enabled: always
+server:
+  port: 8080
+management:
+ endpoints:
+  web:
+   exposure:
+    include: '*'
+ endpoint:
+  health:
+   show-details: always
+  info:
+   env:
+     enabled: true
+info:
+  app:
+    description: this application fetches all the connection of a user
+    name: UserService
+    version: 1
+logging:
+  file:
+    name: logger.log
