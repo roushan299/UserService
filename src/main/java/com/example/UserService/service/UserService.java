@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,15 +59,15 @@ public class UserService {
     }
 
     public ResponseEntity<Object> updateUser(Long userId, UserRequest userRequest) {
-        User user = userRepository.findById(userId).get();
+        Optional<User> optionalUseruser = userRepository.findById(userId);
         ResponseEntity<Object> response;
-        if(user==null){
+        if(optionalUseruser.isEmpty()){
             response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
             return response;
         }
         //update set of the role
         Set<Role> roles = authService.saveRoleAndUpdateInSet(userRequest.getRoles());
-
+        User user = optionalUseruser.get();
         user.setEmail(userRequest.getEmail());
         user.setName(userRequest.getName());
         user.setUsername(userRequest.getUsername());
