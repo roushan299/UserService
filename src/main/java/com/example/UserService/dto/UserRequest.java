@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Data
@@ -26,4 +27,9 @@ public class UserRequest {
     private String password;
 
     private Set<Role> roles;
+
+    public Set<Role> getRoles() {
+        return roles != null ? roles : Collections.emptySet();
+    }
+
 }

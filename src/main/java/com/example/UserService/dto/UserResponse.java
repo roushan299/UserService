@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToMany;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Data
@@ -19,4 +20,9 @@ public class UserResponse {
     private String username;
     private String email;
     private Set<Role> roles;
+
+    public Set<Role> getRoles() {
+        return roles != null ? roles : Collections.emptySet();
+    }
+
 }

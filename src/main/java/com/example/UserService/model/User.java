@@ -3,11 +3,9 @@ package com.example.UserService.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Entity
@@ -16,10 +14,12 @@ import java.util.Set;
 @Setter
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String name;
     private String username;
@@ -29,4 +29,11 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnoreProperties
     private Set<Role> roles;
+
+    public Set<Role> getRoles() {
+        return roles != null ? roles : Collections.emptySet();
+    }
+
+
+
 }

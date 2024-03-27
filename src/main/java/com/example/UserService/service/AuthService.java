@@ -5,14 +5,18 @@ import com.example.UserService.dto.LoginResponse;
 import com.example.UserService.dto.UserRequest;
 import com.example.UserService.model.Role;
 import com.example.UserService.model.User;
+import com.example.UserService.repository.RoleRepository;
 import com.example.UserService.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -20,6 +24,9 @@ public class AuthService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
         //verify the user and create the login token and return login response;
@@ -46,7 +53,7 @@ public class AuthService {
 
     public ResponseEntity<Object> signUpUser(UserRequest userRequest) {
         //verify if user already exits
-        if(exitsByUserName(userRequest.getName())){
+        if(exitsByUserName(userRequest.getUsername())){
             log.info("Username is already taken");
             ResponseEntity<Object> response = new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
             return response;
@@ -60,16 +67,17 @@ public class AuthService {
 
         //if not then create this user, and response Http.ok
         //Role mapping for a new user;
+
+        Set<Role> roles = userRequest.getRoles();
+        //Before saving user save the roles and update the roles in the user model
+        roles = saveRoleAndUpdateInSet(roles);
         User user = User.builder()
                 .username(userRequest.getUsername())
                 .name(userRequest.getName())
                 .email(userRequest.getEmail())
                 .password(userRequest.getPassword())
+                .roles(roles)
                 .build();
-
-        for(Role role: userRequest.getRoles()){
-            user.getRoles().add(role);
-        }
 
         user = userRepository.save(user);
         if(user.getId()!=null) {
@@ -79,6 +87,25 @@ public class AuthService {
         }
         ResponseEntity<Object> response = new ResponseEntity<>("Not able tp create user", HttpStatus.BAD_REQUEST);
         return response;
+    }
+
+    public Set<Role> saveRoleAndUpdateInSet(Set<Role> roles) {
+        Set<Role> roleForUser = new HashSet<>();
+        for(Role role: roles){
+            if(roleExits(role.getName())){
+                Role roleFromDB = roleRepository.findByName(role.getName()).get();
+                roleForUser.add(roleFromDB);
+            }else{
+                role = roleRepository.save(role);
+                roleForUser.add(role);
+            }
+        }
+        return roleForUser;
+    }
+
+    private boolean roleExits(String name) {
+        Optional<Role> role = roleRepository.findByName(name);
+        return role.isPresent();
     }
 
     private boolean exitsByEmailId(String email) {

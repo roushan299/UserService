@@ -3,10 +3,7 @@ package com.example.UserService.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
@@ -16,13 +13,15 @@ import java.util.Set;
 @Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(length = 60)
+    @Column(length = 60, unique = true)
     private String name;
 
     @ManyToMany

@@ -3,6 +3,7 @@ package com.example.UserService.service;
 
 import com.example.UserService.dto.UserRequest;
 import com.example.UserService.dto.UserResponse;
+import com.example.UserService.model.Role;
 import com.example.UserService.model.User;
 import com.example.UserService.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,12 +64,14 @@ public class UserService {
             response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
             return response;
         }
+        //update set of the role
+        Set<Role> roles = authService.saveRoleAndUpdateInSet(userRequest.getRoles());
+
         user.setEmail(userRequest.getEmail());
         user.setName(userRequest.getName());
         user.setUsername(userRequest.getUsername());
         user.setPassword(userRequest.getPassword());
-        user.setRoles(userRequest.getRoles());
-
+        user.setRoles(roles);
         userRepository.save(user);
         response = new ResponseEntity<>("User is updated", HttpStatus.OK);
         return response;

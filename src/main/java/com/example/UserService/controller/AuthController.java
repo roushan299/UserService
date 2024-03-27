@@ -29,6 +29,7 @@ public class AuthController {
     public LoginResponse signIn(@RequestBody @Valid LoginRequest loginRequest){
         //authenticate and send back login response
         LoginResponse loginResponse = authService.authenticateUser(loginRequest);
+
         return loginResponse;
     }
 
@@ -36,6 +37,7 @@ public class AuthController {
     public ResponseEntity<Object> signUp(@RequestBody @Valid UserRequest userRequest){
         //Sign up the user
         ResponseEntity<Object> response = authService.signUpUser(userRequest);
+
         return response;
     }
 

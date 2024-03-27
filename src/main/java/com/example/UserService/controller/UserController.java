@@ -65,6 +65,4 @@ public class UserController {
         ResponseEntity<Object> response = userService.createUser(userRequest);
         return response;
     }
-
-
 }
