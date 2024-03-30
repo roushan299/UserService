@@ -3,6 +3,8 @@ package com.example.UserService.controller;
 import com.example.UserService.dto.LoginRequest;
 import com.example.UserService.dto.LoginResponse;
 import com.example.UserService.dto.UserRequest;
+import com.example.UserService.exception.EmailAlreadyExitsException;
+import com.example.UserService.exception.UsernameAlreadyExitException;
 import com.example.UserService.repository.UserRepository;
 import com.example.UserService.service.AuthService;
 import jakarta.validation.Valid;
@@ -36,7 +38,12 @@ public class AuthController {
     @PostMapping(path = "/signup")
     public ResponseEntity<Object> signUp(@RequestBody @Valid UserRequest userRequest){
         //Sign up the user
-        ResponseEntity<Object> response = authService.signUpUser(userRequest);
+        ResponseEntity<Object> response = null;
+        try {
+            response = authService.signUpUser(userRequest);
+        } catch (UsernameAlreadyExitException | EmailAlreadyExitsException e) {
+            throw new RuntimeException(e);
+        }
 
         return response;
     }

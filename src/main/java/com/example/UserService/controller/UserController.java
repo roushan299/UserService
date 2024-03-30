@@ -3,6 +3,9 @@ package com.example.UserService.controller;
 
 import com.example.UserService.dto.UserRequest;
 import com.example.UserService.dto.UserResponse;
+import com.example.UserService.exception.EmailAlreadyExitsException;
+import com.example.UserService.exception.UserNotFoundException;
+import com.example.UserService.exception.UsernameAlreadyExitException;
 import com.example.UserService.model.User;
 import com.example.UserService.repository.UserRepository;
 import com.example.UserService.service.UserService;
@@ -34,7 +37,12 @@ public class UserController {
     @GetMapping(path = "/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponse getUserById(@PathVariable Long userId){
-        UserResponse userResponse = userService.getUserById(userId);
+        UserResponse userResponse = null;
+        try {
+            userResponse = userService.getUserById(userId);
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return userResponse;
     }
 
@@ -48,21 +56,36 @@ public class UserController {
     @PutMapping(path = "/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> updateUser(@PathVariable Long userId, @RequestBody @Valid UserRequest userRequest){
-        ResponseEntity<Object> responseEntity = userService.updateUser(userId, userRequest);
+        ResponseEntity<Object> responseEntity = null;
+        try {
+            responseEntity = userService.updateUser(userId, userRequest);
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return responseEntity;
     }
 
     @DeleteMapping(path = "/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> deleteUser(@PathVariable Long userId){
-        ResponseEntity<Object> response = userService.deleteUser(userId);
+        ResponseEntity<Object> response = null;
+        try {
+            response = userService.deleteUser(userId);
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return response;
     }
 
     @PostMapping(path = "/signUp", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createUser(@RequestBody UserRequest userRequest){
-        ResponseEntity<Object> response = userService.createUser(userRequest);
+        ResponseEntity<Object> response = null;
+        try {
+            response = userService.createUser(userRequest);
+        } catch (UsernameAlreadyExitException | EmailAlreadyExitsException e) {
+            throw new RuntimeException(e);
+        }
         return response;
     }
 }

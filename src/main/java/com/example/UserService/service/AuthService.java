@@ -3,6 +3,8 @@ package com.example.UserService.service;
 import com.example.UserService.dto.LoginRequest;
 import com.example.UserService.dto.LoginResponse;
 import com.example.UserService.dto.UserRequest;
+import com.example.UserService.exception.EmailAlreadyExitsException;
+import com.example.UserService.exception.UsernameAlreadyExitException;
 import com.example.UserService.model.Role;
 import com.example.UserService.model.User;
 import com.example.UserService.repository.RoleRepository;
@@ -51,18 +53,20 @@ public class AuthService {
             return loginResponse;
     }
 
-    public ResponseEntity<Object> signUpUser(UserRequest userRequest) {
+    public ResponseEntity<Object> signUpUser(UserRequest userRequest) throws UsernameAlreadyExitException, EmailAlreadyExitsException {
         //verify if user already exits
         if(exitsByUserName(userRequest.getUsername())){
             log.info("Username is already taken");
-            ResponseEntity<Object> response = new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
-            return response;
+//            ResponseEntity<Object> response = new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
+//            return response;
+            throw new UsernameAlreadyExitException("Username is already taken");
         }
 
         if(exitsByEmailId(userRequest.getEmail())){
             log.info("Email is already taken");
-            ResponseEntity<Object> response = new ResponseEntity<>("Email has already been taken", HttpStatus.BAD_REQUEST);
-            return response;
+//            ResponseEntity<Object> response = new ResponseEntity<>("Email has already been taken", HttpStatus.BAD_REQUEST);
+//            return response;
+            throw new EmailAlreadyExitsException("Email has already been taken");
         }
 
         //if not then create this user, and response Http.ok
@@ -82,7 +86,7 @@ public class AuthService {
         user = userRepository.save(user);
         if(user.getId()!=null) {
             log.info("User has been created");
-            ResponseEntity<Object> response = new ResponseEntity<>(user.getUsername() + " has been created", HttpStatus.OK);
+            ResponseEntity<Object> response = new ResponseEntity<>(user.getUsername() + " has been created", HttpStatus.CREATED);
             return response;
         }
         ResponseEntity<Object> response = new ResponseEntity<>("Not able tp create user", HttpStatus.BAD_REQUEST);

@@ -3,6 +3,9 @@ package com.example.UserService.service;
 
 import com.example.UserService.dto.UserRequest;
 import com.example.UserService.dto.UserResponse;
+import com.example.UserService.exception.EmailAlreadyExitsException;
+import com.example.UserService.exception.UserNotFoundException;
+import com.example.UserService.exception.UsernameAlreadyExitException;
 import com.example.UserService.model.Role;
 import com.example.UserService.model.User;
 import com.example.UserService.repository.UserRepository;
@@ -33,37 +36,41 @@ public class UserService {
     }
 
 
-    public UserResponse getUserById(Long userId) {
-        User user = userRepository.findById(userId).get();
-        if(user==null){
-            // throw error
+    public UserResponse getUserById(Long userId) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(optionalUser.isEmpty()){
+            throw new UserNotFoundException("User doesn't exit with id:"+userId);
         }
+        User user = optionalUser.get();
         return mapToUserResponse(user);
     }
 
-    public ResponseEntity<Object> createUser(UserRequest userRequest) {
+    public ResponseEntity<Object> createUser(UserRequest userRequest) throws UsernameAlreadyExitException, EmailAlreadyExitsException {
         ResponseEntity<Object> response = authService.signUpUser(userRequest);
         return response;
     }
 
-    public ResponseEntity<Object> deleteUser(Long userId) {
-        User user = userRepository.findById(userId).get();
+    public ResponseEntity<Object> deleteUser(Long userId) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(userId);
         ResponseEntity<Object> response;
-        if(user==null){
-            response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
-            return response;
+        if(optionalUser.isEmpty()){
+//            response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
+//            return response;
+            throw new UserNotFoundException("User doesn't exit with id:"+userId);
         }
+        User user = optionalUser.get();
         userRepository.delete(user);
         response = new ResponseEntity<>("User has been deleted", HttpStatus.OK);
         return response;
     }
 
-    public ResponseEntity<Object> updateUser(Long userId, UserRequest userRequest) {
+    public ResponseEntity<Object> updateUser(Long userId, UserRequest userRequest) throws UserNotFoundException {
         Optional<User> optionalUseruser = userRepository.findById(userId);
         ResponseEntity<Object> response;
         if(optionalUseruser.isEmpty()){
-            response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
-            return response;
+//            response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
+//            return response;
+            throw new UserNotFoundException("User doesn't exit with id:"+userId);
         }
         //update set of the role
         Set<Role> roles = authService.saveRoleAndUpdateInSet(userRequest.getRoles());
@@ -79,8 +86,11 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUserByKeywords(String keywords) {
-        //TO DO
-      return new ArrayList<UserResponse>();
+        List<User> userList = userRepository.findUserByNameKeyword(keywords);
+        if(userList.isEmpty()){
+            userList = userRepository.findUserByUsernameKeyword(keywords);
+        }
+      return userList.stream().map(this::mapToUserResponse).collect(Collectors.toList());
     }
 
 
