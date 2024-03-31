@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -36,8 +36,10 @@ public class AuthService {
         if(optionalUser.isEmpty()){
             optionalUser = userRepository.findByEmail(loginRequest.getUsernameOrEmail());
         }
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = optionalUser.get();
-        if(user.getPassword().equals(loginRequest.getPassword())){
+//        if(user.getPassword().equals(loginRequest.getPassword())){
+          if(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             LoginResponse loginResponse = LoginResponse.builder()
                     .username(user.getUsername())
                     .name(user.getName())
@@ -75,11 +77,13 @@ public class AuthService {
         Set<Role> roles = userRequest.getRoles();
         //Before saving user save the roles and update the roles in the user model
         roles = saveRoleAndUpdateInSet(roles);
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String password = passwordEncoder.encode(userRequest.getPassword());
         User user = User.builder()
                 .username(userRequest.getUsername())
                 .name(userRequest.getName())
                 .email(userRequest.getEmail())
-                .password(userRequest.getPassword())
+                .password(password)
                 .roles(roles)
                 .build();
 

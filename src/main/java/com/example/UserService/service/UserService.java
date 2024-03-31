@@ -12,9 +12,9 @@ import com.example.UserService.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +28,6 @@ public class UserService {
 
     @Autowired
     AuthService authService;
-
 
     public List<UserResponse> getAllUsers() {
         List<User> userList = userRepository.findAll();
@@ -74,11 +73,13 @@ public class UserService {
         }
         //update set of the role
         Set<Role> roles = authService.saveRoleAndUpdateInSet(userRequest.getRoles());
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String password = passwordEncoder.encode(userRequest.getPassword());
         User user = optionalUseruser.get();
         user.setEmail(userRequest.getEmail());
         user.setName(userRequest.getName());
         user.setUsername(userRequest.getUsername());
-        user.setPassword(userRequest.getPassword());
+        user.setPassword(password);
         user.setRoles(roles);
         userRepository.save(user);
         response = new ResponseEntity<>("User is updated", HttpStatus.OK);
