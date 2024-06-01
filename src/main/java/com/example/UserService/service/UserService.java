@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,9 @@ public class UserService {
 
     @Autowired
     AuthService authService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     public List<UserResponse> getAllUsers() {
         List<User> userList = userRepository.findAll();
@@ -64,18 +68,18 @@ public class UserService {
     }
 
     public ResponseEntity<Object> updateUser(Long userId, UserRequest userRequest) throws UserNotFoundException {
-        Optional<User> optionalUseruser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findById(userId);
         ResponseEntity<Object> response;
-        if(optionalUseruser.isEmpty()){
+        if(optionalUser.isEmpty()){
 //            response = new ResponseEntity<>("No user exists", HttpStatus.BAD_REQUEST);
 //            return response;
             throw new UserNotFoundException("User doesn't exit with id:"+userId);
         }
         //update set of the role
         Set<Role> roles = authService.saveRoleAndUpdateInSet(userRequest.getRoles());
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String password = passwordEncoder.encode(userRequest.getPassword());
-        User user = optionalUseruser.get();
+        User user = optionalUser.get();
         user.setEmail(userRequest.getEmail());
         user.setName(userRequest.getName());
         user.setUsername(userRequest.getUsername());

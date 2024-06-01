@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -30,13 +31,16 @@ public class AuthService {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
         //verify the user and create the login token and return login response;
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsernameOrEmail());
         if(optionalUser.isEmpty()){
             optionalUser = userRepository.findByEmail(loginRequest.getUsernameOrEmail());
         }
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = optionalUser.get();
 //        if(user.getPassword().equals(loginRequest.getPassword())){
           if(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
@@ -77,7 +81,7 @@ public class AuthService {
         Set<Role> roles = userRequest.getRoles();
         //Before saving user save the roles and update the roles in the user model
         roles = saveRoleAndUpdateInSet(roles);
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+       // BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String password = passwordEncoder.encode(userRequest.getPassword());
         User user = User.builder()
                 .username(userRequest.getUsername())
@@ -100,8 +104,10 @@ public class AuthService {
     public Set<Role> saveRoleAndUpdateInSet(Set<Role> roles) {
         Set<Role> roleForUser = new HashSet<>();
         for(Role role: roles){
-            if(roleExits(role.getName())){
-                Role roleFromDB = roleRepository.findByName(role.getName()).get();
+            String roleName = role.getName();
+            Optional<Role> optionalRole = roleRepository.findByName(roleName);
+            if(optionalRole.isPresent()){
+                Role roleFromDB = optionalRole.get();
                 roleForUser.add(roleFromDB);
             }else{
                 role = roleRepository.save(role);
@@ -109,11 +115,6 @@ public class AuthService {
             }
         }
         return roleForUser;
-    }
-
-    private boolean roleExits(String name) {
-        Optional<Role> role = roleRepository.findByName(name);
-        return role.isPresent();
     }
 
     private boolean exitsByEmailId(String email) {
